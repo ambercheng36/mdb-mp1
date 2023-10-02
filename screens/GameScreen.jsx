@@ -9,6 +9,11 @@ const names = Object.keys(nameToPic);
 
 export default function GameScreen() {
   // TODO: Declare and initialize state variables here, using "useState".
+  const [correctCount, setCorrectCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentMemberName, setCurrentMemberName] = useState("");
+  const [nameOptions, setNameOptions] = useState([]);
+  const [correctImage, setCorrectImage] = useState("");
 
   // State for the timer is handled for you.
   const [timeLeft, setTimeLeft] = useState(5000);
@@ -21,6 +26,8 @@ export default function GameScreen() {
     } else {
       // Time has expired
       // TODO: update appropriate state variables
+      setTotalCount(totalCount + 1);
+      getNextRound();
     }
   };
 
@@ -44,13 +51,22 @@ export default function GameScreen() {
     nameOptions = shuffle(nameOptions);
 
     // TODO: Update state here.
+    setCurrentMemberName(correctName);
+    setCorrectImage(correctImage);
+    setNameOptions(nameOptions);
 
     setTimeLeft(5000);
   };
 
   // Called when user taps a name option.
   // TODO: Update correct # and total # state values.
-  const selectedNameChoice = (index) => {};
+  const selectedNameChoice = (index) => {
+    if (nameOptions[index] === currentMemberName) {
+      setCorrectCount(correctCount + 1);
+    }
+    setTotalCount(totalCount + 1);
+    getNextRound();
+  };
 
   // Call the countDown() method every 10 milliseconds.
   useEffect(() => {
@@ -58,23 +74,20 @@ export default function GameScreen() {
     return function cleanup() {
       clearInterval(timer);
     };
-  });
+  }, [timeLeft]);
 
   // TODO: Finish this useEffect() hook such that we automatically
   // get the next round when the appropriate state variable changes.
-  useEffect(
-    () => {
+  useEffect(() => {
       getNextRound();
-    },
-    [
-      /* TODO: Your State Variable Goes Here */
-    ]
-  );
+    }, [
+      currentMemberName /* TODO: Your State Variable Goes Here */
+    ]);
 
   // Set up four name button components
   const nameButtons = [];
   for (let i = 0; i < 4; i++) {
-    const j = i;
+    const j = i
     nameButtons.push(
       // A button is just a Text component wrapped in a TouchableOpacity component.
       <TouchableOpacity
@@ -83,7 +96,7 @@ export default function GameScreen() {
         onPress={() => selectedNameChoice(j)}
       >
         <Text style={styles.buttonText}>
-          {/* TODO: Use something from state here. */}
+          {nameOptions[j] /* TODO: Use something from state here. */}
         </Text>
       </TouchableOpacity>
     );
@@ -98,6 +111,10 @@ export default function GameScreen() {
       {/* Hint: What does the nameButtons list above hold? 
           What types of objects is this list storing?
           Try to get a sense of what's going on in the for loop above. */}
+      <Text style={styles.scoreText}>Current Score: {correctCount}/{totalCount}</Text>
+      <Text style={styles.timerText}>Time Remaining: {timeRemainingStr} seconds</Text>
+      <Image source={correctImage} style={styles.image} />
+      {nameButtons}
     </View>
   );
 }
